@@ -184,6 +184,7 @@ int main(int argc, char *argv[]) {
         if (kernel == "naive" || kernel == "all") {
             START_TIMER();
             cudaTranspose(d_input, d_output, n, NAIVE);
+            gpuErrChk(cudaGetLastError());
             STOP_RECORD_TIMER(naive_gpu_ms);
 
             gpuErrChk(cudaMemcpy(output, d_output, n * n * sizeof(float), 
