@@ -2,7 +2,7 @@ CC = /usr/bin/g++
 
 LD_FLAGS = -lrt
 
-CUDA_PATH       ?= /usr/local/cuda-11.0
+CUDA_PATH       ?= /usr/local/cuda-10.1
 CUDA_INC_PATH   ?= $(CUDA_PATH)/include
 CUDA_BIN_PATH   ?= $(CUDA_PATH)/bin
 CUDA_LIB_PATH   ?= $(CUDA_PATH)/lib
