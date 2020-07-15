@@ -33,7 +33,7 @@ __device__ static float atomicMax(float* address, float val)
 
 
 __device__ void PWMS(const cufftComplex a, const cufftComplex b, cufftComplex &c, const int N) {
-    const int Ninv = 1./N;
+    const float Ninv = 1./N;
     c.x = (a.x*b.x - a.y*b.y)*Ninv;
     c.y = (a.x*b.y + a.y*b.x)*Ninv;
 }
@@ -59,6 +59,8 @@ cudaProdScaleKernel(const cufftComplex *raw_data, const cufftComplex *impulse_v,
     */
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     while (idx < padded_length) {
+        //out_data[idx].x = (raw_data[idx].x*impulse_v[idx].x - raw_data[idx].y*impulse_v[idx].y)/padded_length;
+        //out_data[idx].y = (raw_data[idx].x*impulse_v[idx].y + raw_data[idx].y*impulse_v[idx].x)/padded_length;
         PWMS(raw_data[idx], impulse_v[idx], out_data[idx], padded_length);
         idx += gridDim.x*blockDim.x;
     }
@@ -108,12 +110,12 @@ cudaMaximumKernel(cufftComplex *out_data, float *max_abs_val,
 
     // reset idx
     idx = threadIdx.x + blockDim.x * blockIdx.x;
-    s_max[idx] = max_idx;
+    s_max[threadIdx.x] = max_idx;
 
     __syncthreads();
 
     int N = blockDim.x/2;
-    while (idx < N) {
+    while (threadIdx.x < N) {
         if (s_max[threadIdx.x] < s_max[threadIdx.x + N]) {
             s_max[threadIdx.x] = s_max[threadIdx.x + N];
         }

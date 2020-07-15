@@ -470,7 +470,7 @@ int large_gauss_test(int argc, char **argv){
         } else {
                 cerr << "No kernel error detected" << endl;
         }
-
+        
         STOP_RECORD_TIMER(gpu_time_ms_norm);
 
         // For testing purposes only
@@ -548,8 +548,8 @@ int main(int argc, char **argv){
     // if you are using a shared computer. You may ignore or remove these
     // functions if you are running on your local machine.
     TA_Utilities::select_coldest_GPU();
-    int max_time_allowed_in_seconds = 90;
-    TA_Utilities::enforce_time_limit(max_time_allowed_in_seconds);
+    //int max_time_allowed_in_seconds = 90;
+    //TA_Utilities::enforce_time_limit(max_time_allowed_in_seconds);
 
     return large_gauss_test(argc, argv);
 }
