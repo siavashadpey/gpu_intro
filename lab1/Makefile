@@ -12,7 +12,7 @@ CPP_FILES = src/blur.cpp
 # ------------------------------------------------------------------------------
 
 # CUDA Compiler and Flags
-CUDA_PATH = /usr/local/cuda
+CUDA_PATH = /usr/local/cuda-11.0
 CUDA_INC_PATH = $(CUDA_PATH)/include
 CUDA_BIN_PATH = $(CUDA_PATH)/bin
 CUDA_LIB_PATH = $(CUDA_PATH)/lib64
