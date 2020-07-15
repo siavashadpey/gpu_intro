@@ -207,4 +207,4 @@ can be implemented in an embarrassingly parallel manner.
 ================================================================================
 Question 3: Small-Kernel Convolution (50 points)
 ================================================================================
-See 'cs179_lab1.ipynb' for code.
+'resources/example_test_out.wav' is theoutput file for 'resources/example_test.wav'
