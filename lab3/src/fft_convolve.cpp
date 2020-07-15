@@ -198,9 +198,9 @@ int large_gauss_test(int argc, char **argv){
     due to the padding necessary for the FFT convolution.
     Also, unlike in Homework 1, we don't copy our impulse response
     yet, because this is now given to us per-channel. */
-    gpuErrchk(cudaMalloc((voud **) &dev_input_data, padded_length * sizeof(cufftComplex))); 
-    gpuErrchk(cudaMalloc((voud **) &dev_impulse_v, padded_length * sizeof(cufftComplex))); 
-    gpuErrchk(cudaMalloc((voud **) &dev_out_data, padded_length * sizeof(cufftComplex)));  
+    gpuErrchk(cudaMalloc((void **) &dev_input_data, padded_length * sizeof(cufftComplex))); 
+    gpuErrchk(cudaMalloc((void **) &dev_impulse_v, padded_length * sizeof(cufftComplex))); 
+    gpuErrchk(cudaMalloc((void **) &dev_out_data, padded_length * sizeof(cufftComplex)));  
 
 // (From Eric's code)
     cudaEvent_t start;
@@ -323,9 +323,9 @@ int large_gauss_test(int argc, char **argv){
         (See Lecture 9 for details on padding.)
         Set the rest of the memory regions to 0 (recommend using cudaMemset).
         */
-        gupErrchk(cudaMemset(&dev_input_data[N], 0, (impulse_length - 1)*sizeof(cufftComplex)));
-        gupErrchk(cudaMemset(&dev_impulse_v[impulse_length], 0, (N - 1)*sizeof(cufftComplex)));
-        gupErrchk(cudaMemset(dev_out_data, 0, padded_length*sizeof(cufftComplex)));
+        gpuErrchk(cudaMemset(&dev_input_data[N], 0, (impulse_length - 1)*sizeof(cufftComplex)));
+        gpuErrchk(cudaMemset(&dev_impulse_v[impulse_length], 0, (N - 1)*sizeof(cufftComplex)));
+        gpuErrchk(cudaMemset(dev_out_data, 0, padded_length*sizeof(cufftComplex)));
 
         /* DONE: Create a cuFFT plan for the forward and inverse transforms. 
         (You can use the same plan for both, as is done in the lecture examples.)
