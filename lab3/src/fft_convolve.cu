@@ -166,7 +166,7 @@ void cudaCallMaximumKernel(const unsigned int blocks,
         const unsigned int padded_length) {
         
     /* DONE: Call the max-finding kernel. */
-    cudaMaximumKernel<<<blocks, threadsPerBlock, blockDim.x*sizeof(float)>>>(out_data, max_abs_val, padded_length);
+    cudaMaximumKernel<<<blocks, threadsPerBlock, threadsPerBlock*sizeof(float)>>>(out_data, max_abs_val, padded_length);
 
 }
 
