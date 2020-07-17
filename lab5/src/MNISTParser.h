@@ -109,7 +109,7 @@ public:
             printf("Failed to open %s for reading\n", imageFile);
             return 1;
         }
-
+        
         FILE* flabel = fopen(labelFile, "rb");
         if (!flabel)
         {
@@ -122,7 +122,7 @@ public:
         });
 
         uint32_t value;
-
+        
         // Read magic number
         assert(!feof(fimg));
         if(fread(&value, sizeof(uint32_t), 1, fimg) != 1)
@@ -135,7 +135,7 @@ public:
         if (verbose)
             printf("Image Magic        :%0X%I32u\n",
                 __builtin_bswap32(value), __builtin_bswap32(value));
-
+        
         // Read count
         assert(!feof(fimg));
         if(fread(&value, sizeof(uint32_t), 1, fimg) != 1)
@@ -147,7 +147,7 @@ public:
         assert(count > 0);
         if (verbose)
             printf("Image Count        :%0X%I32u\n", count, count);
-
+        
         // Read rows
         assert(!feof(fimg));
         if(fread(&value, sizeof(uint32_t), 1, fimg) != 1)
@@ -159,7 +159,7 @@ public:
         assert(rows > 0);
         if (verbose)
             printf("Image Rows         :%0X%I32u\n", rows, rows);
-
+        
         // Read cols
         assert(!feof(fimg));
         if(fread(&value, sizeof(uint32_t), 1, fimg) != 1)
@@ -170,7 +170,7 @@ public:
         assert(cols > 0);
         if (verbose)
             printf("Image Columns      :%0X%I32u\n", cols, cols);
-
+        
         // Read magic number (label)
         assert(!feof(flabel));
         if(fread(&value, sizeof(uint32_t), 1, flabel) != 1)
@@ -182,7 +182,7 @@ public:
         if (verbose)
             printf("Label Magic        :%0X%I32u\n",
                 __builtin_bswap32(value), __builtin_bswap32(value));
-
+        
         // Read label count
         assert(!feof(flabel));
         if(fread(&value, sizeof(uint32_t), 1, flabel) != 1)
@@ -195,14 +195,12 @@ public:
         if (verbose)
             printf("Label Count        :%0X%I32u\n",
                 __builtin_bswap32(value), __builtin_bswap32(value));
-
+        
         Initialize(cols, rows, count);
-
         int counter = 0;
         while (!feof(fimg) && !feof(flabel) && counter < m_count)
         {
             float* imageBuffer = &m_imageBuffer[counter * m_imageSize];
-
             for (int j = 0; j < m_height; ++j)
             {
                 for (int i = 0; i < m_width; ++i)
@@ -217,7 +215,6 @@ public:
                     imageBuffer[j * m_width + i] = pixel;
                 }
             }
-
             uint8_t cat;
             fread(&cat, sizeof(uint8_t), 1, flabel);
             // assert(cat >= 0 && cat < c_categoryCount);
@@ -225,7 +222,6 @@ public:
 
             ++counter;
         }
-
         return 0;
     }
 private:

@@ -47,7 +47,7 @@ float CrossEntropyLoss(float* pred_Y, float* true_Y, int n, int c, int h, int w)
     // Accumulate the total loss on the device by invoking a kernel
     int n_blocks = std::min(65535, (n * c * h * w + BW  - 1) / BW);
     // DONE (set 5): call CrossEntropyKernel
-    CUDA_CALL( CrossEntropyKernel<<<n_blocks, BW, BW*sizeof(float)>>>(pred_Y, true_Y, d_loss, n, c, h, w));
+    CrossEntropyKernel<<<n_blocks, BW, BW*sizeof(float)>>>(pred_Y, true_Y, d_loss, n, c, h, w);
 
     // Copy back the accumulated loss on the device back to the host
     CUDA_CALL( cudaMemcpy(&loss, d_loss, sizeof(float), cudaMemcpyDeviceToHost) );
@@ -111,7 +111,7 @@ __global__ void CrossEntropyKernel(float* pred_Y, float* true_Y, float *loss,
     int idx = threadIdx.x + blockDim.x*blockIdx.x;
     const int N = n*c*h*w;    
     while (idx < N) {
-        shmem[threadIdx.x] -= log(pred_Y[idx]*true_Y[idx]);
+        shmem[threadIdx.x] += log(pred_Y[idx])*true_Y[idx];
         idx += gridDim.x*blockDim.x;
     }
 

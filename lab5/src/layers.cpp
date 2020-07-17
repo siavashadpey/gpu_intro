@@ -193,14 +193,12 @@ void Layer::init_weights_biases()
     int n, c, h, w, n_stride, c_stride, h_stride, w_stride;
     CUDNN_CALL(cudnnGetTensor4dDescriptor(in_shape, &dtype, &n, &c, &h, &w,
         &n_stride, &c_stride, &h_stride, &w_stride));
-
     curandGenerator_t gen;
     float minus_half = -0.5;
     float range = 2 / sqrt(static_cast<float>(c * h * w));
     std::random_device rd;
     CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
     CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, rd()) );
-
     if (weights)
     {
         CURAND_CALL( curandGenerateUniform(gen, weights, n_weights) );
@@ -208,10 +206,8 @@ void Layer::init_weights_biases()
             &minus_half, weights, 1, weights, 1) );
         CUBLAS_CALL( cublasSscal(cublasHandle, n_weights, &range, weights, 1) );
     }
-
     if (biases)
         cudaMemsetType<float>(biases, 0.0f, n_biases);
-
     CURAND_CALL( curandDestroyGenerator(gen) );
 }
 
@@ -238,10 +234,12 @@ Input::Input(int n, int c, int h, int w,
 Input::~Input() = default;
 
 /** Input layer does no processing on its input. */
-void Input::forward_pass() {}
+void Input::forward_pass() {
+}
 
 /** Nothing is behind the input layer. */
-void Input::backward_pass(float learning_rate) {}
+void Input::backward_pass(float learning_rate) {
+}
 
 
 /******************************************************************************/
@@ -257,28 +255,33 @@ Dense::Dense(Layer *prev, int out_dim,
 : Layer(prev, cublasHandle, cudnnHandle)
 {
     // Get the input shape for the layer and flatten it if needed
+    
     cudnnDataType_t dtype;
+    
     int n, c, h, w, n_stride, c_stride, h_stride, w_stride;
     CUDNN_CALL( cudnnGetTensor4dDescriptor(in_shape, &dtype, &n, &c, &h, &w,
         &n_stride, &c_stride, &h_stride, &w_stride) );
+    
     CUDNN_CALL( cudnnSetTensor4dDescriptor(in_shape, CUDNN_TENSOR_NCHW,
         dtype, n, c * h * w, 1, 1) );
-
+    
     // Initialize the output shape to be N out_size-dimensional vectors
     CUDNN_CALL(cudnnSetTensor4dDescriptor(out_shape, CUDNN_TENSOR_NCHW, dtype,
         n, out_dim, 1, 1));
+    
 
     // Initialize local shape parameters appropriately
     this->batch_size = n;
     this->in_size = c * h * w;
     this->out_size = out_dim;
-
+    
     // The weights matrix is in_size by out_size, and there are out_size biases
     this->n_weights = in_size * out_size;
     this->n_biases = out_size;
+    
     allocate_buffers();
+    
     init_weights_biases();
-
     // Allocate a vector of all ones (filled with thrust::fill)
     CUDA_CALL( cudaMalloc(&onevec, batch_size * sizeof(float)) );
     cudaMemsetType<float>(onevec, 1.0f, batch_size);
@@ -304,8 +307,8 @@ void Dense::forward_pass()
     CUBLAS_CALL (cublasSgemm(cublasHandle, CUBLAS_OP_T, CUBLAS_OP_N,
         out_size, batch_size, in_size,
         &one,
-        weights, in_size,    // assuming column-major (thus leading dim = row dim)
-        in_batch, in_size, // assuming column-major (thus leading dim = row dim)
+        weights, in_size,  // column-major (thus leading dim = row dim)
+        in_batch, in_size, // column-major (thus leading dim = row dim)
         &zero,
         out_batch, out_size)); // column-major (given)
 
@@ -333,7 +336,7 @@ void Dense::backward_pass(float learning_rate)
 
     // DONE (set 5): grad_weights = in_batch * (grad_out_batch)^T
     // A^(l-1) * delta^(l)^T
-    CUBLASS_CALL ( cublasSgemm(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_T,
+    CUBLAS_CALL ( cublasSgemm(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_T,
         in_size, out_size, batch_size,
         &one,
         in_batch, in_size, // assuming column-major (ld = row dim)
@@ -341,7 +344,6 @@ void Dense::backward_pass(float learning_rate)
         &zero,
         grad_weights, in_size // assuming column-major
         ) );
-
 
     // grad_biases = grad_out_batch * 1_vec
     // grad_biases is a vector of length out_size
@@ -357,7 +359,7 @@ void Dense::backward_pass(float learning_rate)
     // Note that grad_out_batch is the next layer's grad_in_batch, and
     // grad_in_batch is the previous layer's grad_out_batch
     // delta^(l-1) = W^(l) * delta^(l). It is a in_size^(l) x batch_size matrix
-    CUBLAS_CALL( cublasSgemv(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_N,
+    CUBLAS_CALL( cublasSgemm(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_N,
         in_size, batch_size, out_size,
         &one,
         weights, in_size, // column-major (leading dim = row dim)
@@ -371,7 +373,7 @@ void Dense::backward_pass(float learning_rate)
 
     // DONE (set 5): weights = weights + eta * grad_weights
     // note that grad_weights are already normalized by batch_size
-    CUBLASS_CALL ( cublasSgeam(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_N,
+    CUBLAS_CALL ( cublasSgeam(cublasHandle, CUBLAS_OP_N, CUBLAS_OP_N,
         in_size, out_size,
         &one,
         weights, in_size,
@@ -425,8 +427,7 @@ Activation::Activation(Layer *prev, cudnnActivationMode_t activationMode,
 Activation::~Activation()
 {
     // DONE (set 5): destroy the activation descriptor
-    CUDA_CALL( cudaFree(activation_desc));
-    CUDDNN_CALL(cudnnDestroyActivationDescriptor(activation_desc));
+    CUDNN_CALL(cudnnDestroyActivationDescriptor(activation_desc));
 }
 
 /**
@@ -438,14 +439,6 @@ void Activation::forward_pass()
     float one = 1.0, zero = 0.0;
 
     // DONE (set 5): apply activation, i.e. out_batch = activation(in_batch)
-    cudnnActivationMode_t *mode;
-    cudnnNanPropagation_t *NanOpt;
-    double *coef;
-    CUDNN_CALL(cudnnGetActivationDescriptor(
-        activation_desc, mode,
-        NanOpt,
-        coef
-        ) );
     // out_batch = one*activation(in_batch) + zero*out_batch
     CUDNN_CALL( cudnnActivationForward(
         cudnnHandle,
@@ -468,23 +461,15 @@ void Activation::backward_pass(float learning_rate)
     float one = 1.0, zero = 0.0;
 
     // DONE (set 5): do activation backwards, i.e. compute grad_in_batch
-    cudnnActivationMode_t *mode;
-    cudnnNanPropagation_t *NanOpt;
-    double *coef;
-    CUDNN_CALL(cudnnGetActivationDescriptor(
-        activation_desc, mode,
-        NanOpt,
-        coef
-        ) );
     CUDNN_CALL( cudnnActivationBackward(
         cudnnHandle,
         activation_desc,
         &one,
-        in_shape, in_batch,
-        in_shape, grad_in_batch,
-        &zero,
         out_shape, out_batch,
-        out_shape, grad_out_batch
+        out_shape, grad_out_batch,
+        in_shape, in_batch,
+        &zero,
+        in_shape, grad_in_batch
         ));
 }
 
@@ -751,23 +736,20 @@ void SoftmaxCrossEntropy::backward_pass(float lr)
     CUDNN_CALL( cudnnGetTensor4dDescriptor(out_shape, &dtype, &n, &c, &h, &w,
         &nStride, &cStride, &hStride, &wStride) );
     int size = n * c * h * w;
-
     // grad_in_batch = softmax(in_batch) - true_Y
     //               = out_batch         - grad_out_batch
     // all have a length equal to "size" variable defined above
     float minus_one = -1.0;
 
     // DONE (set 5): first, copy grad_in_batch = out_batch
-    grad_in_batch = out_batch;
-
+    CUDA_CALL( cudaMemcpy(grad_in_batch, out_batch, size*sizeof(float), cudaMemcpyDeviceToDevice) );
     // DONE (set 5): set grad_in_batch = grad_in_batch - grad_out_batch using
     //               cublasSaxpy
-    CUBLAS_CALL (cublasSaxpy(cublasHandle, out_shape,
+    CUBLAS_CALL (cublasSaxpy(cublasHandle, size,
         &minus_one,
          grad_out_batch, 1,
          grad_in_batch, 1
         ));
-
     // normalize the gradient by the batch size (do it once in the beginning, so
     // we don't have to worry about it again later)
     float scale = 1.0f / static_cast<float>(n);

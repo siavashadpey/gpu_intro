@@ -194,6 +194,7 @@ void Model::train(const float *train_X, float *train_Y, float lr, int n_examples
         {
             const float *curr_batch_X = train_X + curr_batch * in_size;
             float *curr_batch_Y = train_Y + curr_batch * out_size;
+            
             train_on_batch(curr_batch_X, curr_batch_Y, lr);
 
             // Update training statistics for this minibatch
@@ -310,13 +311,15 @@ void Model::train_on_batch(const float *batch_X, float *batch_Y, float lr)
 
     // Do a forward pass through every layer
     std::vector<Layer *>::iterator it;
-    for (it = this->layers->begin(); it != this->layers->end(); ++it)
+    for (it = this->layers->begin(); it != this->layers->end(); ++it) {
         (*it)->forward_pass();
+    }
 
     // Do a backward pass through every layer
     std::vector<Layer *>::reverse_iterator rit;
-    for (rit = this->layers->rbegin(); rit != this->layers->rend(); ++rit)
+    for (rit = this->layers->rbegin(); rit != this->layers->rend(); ++rit) {
         (*rit)->backward_pass(lr);
+    }
 }
 
 
