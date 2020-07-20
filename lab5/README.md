@@ -1,3 +1,7 @@
+Note: The dataset can be downloaed from [here](http://yann.lecun.com/exdb/mnist/). It is not included in this repository because of its size.
+
+-
+
 This is a library that can be used to implement a fully connected neural network
 for classification purposes. A high level interface for constructing a linear
 feed-forward network is implemented in model.hpp and model.cpp. To add a layer,
