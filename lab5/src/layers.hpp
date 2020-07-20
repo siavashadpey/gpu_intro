@@ -211,7 +211,7 @@ public:
     void backward_pass(float learning_rate) override;
 
 private:
-    /** Descriptor for the shape of the convolutional filter to be learned */
+    /** Descriptor for the shape of the convolutional kernel/filter to be learned */
     cudnnFilterDescriptor_t filter_desc;
 
     /** Descriptor for the biases */

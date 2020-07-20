@@ -114,13 +114,12 @@ cudaMaximumKernel(cufftComplex *out_data, float *max_abs_val,
 
     __syncthreads();
 
-    int N = blockDim.x/2;
-    while (threadIdx.x < N) {
-        if (s_max[threadIdx.x] < s_max[threadIdx.x + N]) {
-            s_max[threadIdx.x] = s_max[threadIdx.x + N];
+    for (int N = blockDim.x/2; N > 0; N >>= 1) {
+        if (threadIdx.x < N) {
+            if (s_max[threadIdx.x] < s_max[threadIdx.x + N]) {
+                s_max[threadIdx.x] = s_max[threadIdx.x + N];
+            }
         }
-
-        N /= 2;
         __syncthreads();
     }
 
@@ -141,10 +140,10 @@ cudaDivideKernel(cufftComplex *out_data, float *max_abs_val,
     This kernel should be quite short.
     */
     int idx = threadIdx.x + blockDim.x * blockIdx.x;
-
+    float inv_max = 1.0f/(*max_abs_val);
     while (idx < padded_length) {
-        out_data[idx].x /= *max_abs_val;
-        out_data[idx].y /= *max_abs_val;
+        out_data[idx].x *= inv_max;
+        out_data[idx].y *= inv_max;
         idx += gridDim.x *blockDim.x;
     }
 

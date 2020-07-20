@@ -117,10 +117,10 @@ __global__ void CrossEntropyKernel(float* pred_Y, float* true_Y, float *loss,
 
     __syncthreads();
 
-    int s = blockDim.x/2;
-    while (threadIdx.x < s) {
-        shmem[threadIdx.x] += shmem[threadIdx.x + s];
-        s /= 2;
+    for (int s = blockDim.x/2; s > 0; s >>= 1) {
+        if (threadIdx.x < s) {
+            shmem[threadIdx.x] += shmem[threadIdx.x + s];
+        }
         __syncthreads();
     }
 
@@ -143,7 +143,7 @@ __global__ void SoftThresholdAccKernel(float* pred_Y, float* true_Y, float* acc,
 
     // have each thread in each block accumulate some of the total loss in
     // shared memory
-    shmem[tid] = 0.0;
+    shmem[tid] = 0.0f;
     for (; idx < n; idx += blockDim.x * gridDim.x)
     {
         unsigned idx_cur = idx * c * h * w;
@@ -162,7 +162,7 @@ __global__ void SoftThresholdAccKernel(float* pred_Y, float* true_Y, float* acc,
 
         // If we were correct, add 1 to the accuracy count
         if (argmax_pred == argmax_true)
-            shmem[tid] += 1.0;
+            shmem[tid] += 1.0f;
     }
     __syncthreads();
 
