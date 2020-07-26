@@ -14,11 +14,11 @@ The concepts taught in this course are:
 ## Code
 Code written for this course includes:
 
-1. Lab 1 - Small kernel convolution.
-2. Lab 2 - Matrix transposing. (concepts: memory coalescing, avoiding bank conflicts, ILP, atomic operations).
-3. Lab 3 - Reduction and FFT. (concepts: writing a reduction algorithm, use of cuBLAS and cuFFT).
-4. Lab 5 - Convolutional Neural Networks. (concepts: writing a CNN for MNIST handwritten digit classication, use of cuBLAS and cuDNN).
+1. [Lab 1](https://github.com/siavashadpey/gpu_intro/tree/master/lab1) - Small kernel convolution.
+2. [Lab 2](https://github.com/siavashadpey/gpu_intro/tree/master/lab2) - Matrix transposing. (concepts: memory coalescing, avoiding bank conflicts, ILP, atomic operations).
+3. [Lab 3](https://github.com/siavashadpey/gpu_intro/tree/master/lab3) - Reduction and FFT. (concepts: writing a reduction algorithm, use of cuBLAS and cuFFT).
+4. [Lab 5](https://github.com/siavashadpey/gpu_intro/tree/master/lab5) - Convolutional Neural Networks. (concepts: writing a CNN for MNIST handwritten digit classication, use of cuBLAS and cuDNN).
 
 Additional code:
 
-1. Tiled matrix multiplication.
+1. [Tiled matrix multiplication](https://github.com/siavashadpey/gpu_intro/blob/master/tiled_matrix_multiplication_nicer.ipynb) - A matrix multiplication using tiles to increase memory reuse.
