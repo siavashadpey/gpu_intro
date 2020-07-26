@@ -21,4 +21,4 @@ Code written for this course includes:
 
 Additional code:
 
-1. [Tiled matrix multiplication](https://github.com/siavashadpey/gpu_intro/blob/master/tiled_matrix_multiplication_nicer.ipynb) - A matrix multiplication using tiles to increase memory reuse.
+1. [Tiled matrix multiplication](https://github.com/siavashadpey/gpu_intro/blob/master/tiled_matrix_multiplication_nicer.ipynb) - A matrix multiplication implelmentation using tiles to increase memory reuse.
